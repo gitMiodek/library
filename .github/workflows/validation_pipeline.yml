@@ -5,7 +5,6 @@ on:
   push:
 
 env:
-  REPO_NAME: ${{ github.event.repository.name }}
   PYTHON_VERSION: '3.12'
 
 jobs:
@@ -23,12 +22,48 @@ jobs:
 
       - name: Install flake8 linter
         run: |
-          python -m pip install pip
-          pip install flake8==7.1.1 nbqa==1.9.0 flake8-todos==0.3.1
+          pip install -r general_requirements.txt
 
       - name: Run flake on py files
         run: flake8 --max-line-length=120 --statistics --ignore E127,E402,E731,E741,W503,T002 .
+  Mypy:
+    name: Mypy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Run flake on notebook files
-        run: nbqa flake8 . --max-line-length=120 --statistics --ignore E127,E402,E731,E741,W503,T002 --nbqa-exclude=third_party
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: install requirements
+        run: |
+          pip install -r requirements-history.txt
+      - name: run Mypy
+        run: mypy .
+
+  Test_App:
+    name: Test App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: install requirements
+        run: |
+          pip install -r requirements-history.txt
+
+      - name: Run tests
+        run: |
+          docker compose -f docker-compose.yml up --wait || exit 1
+          (set +e;pytest -v tests/app --port 8000; RET=$?; docker logs ${REPO_NAME}-app-1; exit $RET)
+          docker compose down
+
+
 

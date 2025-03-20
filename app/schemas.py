@@ -1,40 +1,32 @@
-from pydantic import BaseModel, conint
+import json
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
+
+from pydantic import BaseModel
+
+example_input_dir = Path(__file__).resolve().parents[1] / 'app/examples'
+
 
 class BookBase(BaseModel):
     """
-    Podstawowy schemat książki
+    Book schema
     """
     serial_number: int
     title: str
     author: str
 
-class BookCreate(BookBase):
-    """
-    Schemat do tworzenia nowej książki
-    """
-    pass
+    class Config:
+        with open(example_input_dir / "book.json") as f:
+            json_schema_extra = {'example': json.load(f)}
+
 
 class Book(BookBase):
     """
-    Pełny schemat książki zwracany przez API
+    Book schema returned by API
     """
     is_borrowed: bool
     borrowed_date: Optional[datetime] = None
-    borrower_id: Optional[int] = None
 
     class Config:
-        orm_mode = True
-
-class BorrowInfo(BaseModel):
-    """
-    Schemat informacji o wypożyczeniu
-    """
-    borrower_id: int
-
-class Message(BaseModel):
-    """
-    Schemat wiadomości
-    """
-    message: str
+        from_attributes = True

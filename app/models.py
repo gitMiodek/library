@@ -1,10 +1,11 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
+
 from app.database import Base
 
 
 class Book(Base):
     """
-    Model książki w bazie danych
+    Book model in the database
     """
     __tablename__ = "books"
 
