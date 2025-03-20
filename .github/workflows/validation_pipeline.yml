@@ -37,10 +37,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: install requirements
+      - name: Install requirements
         run: |
           pip install -r general_requirements.txt
-      - name: run Mypy
+      - name: Run Mypy
         run: mypy .
 
   Test_App:
@@ -55,14 +55,14 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: install requirements
+      - name: Install requirements
         run: |
           pip install -r general_requirements.txt
 
       - name: Run tests
         run: |
           docker compose -f docker-compose.yml up --wait || exit 1
-          (set +e;pytest -v tests/app --port 8000; RET=$?; docker logs ${REPO_NAME}-app-1; exit $RET)
+          (set +e;pytest --port 8000; RET=$?; exit $RET)
           docker compose down
 
 
